@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserById = exports.postUser = exports.getUser = void 0;
+exports.getUserById = exports.postUser = exports.deleteUser = exports.getUser = void 0;
 const service = __importStar(require("../services/user-service"));
 const http_helper_1 = require("../../utils/http-helper");
 const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -40,6 +40,12 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.status(httpResponse.statusCode).json(httpResponse.body);
 });
 exports.getUser = getUser;
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = parseInt(req.params.id);
+    const httpResponse = yield service.deleteUserService(id);
+    res.status(httpResponse.statusCode).json(httpResponse.body);
+});
+exports.deleteUser = deleteUser;
 const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const bodyValue = req.body;
     const httpResponse = yield service.createUserService(bodyValue);

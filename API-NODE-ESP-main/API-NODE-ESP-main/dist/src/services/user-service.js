@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserByIdService = exports.createUserService = exports.getUserService = void 0;
+exports.deleteUserService = exports.getUserByIdService = exports.createUserService = exports.getUserService = void 0;
 const httpResponse = __importStar(require("../../utils/http-helper"));
 const UserRepository = __importStar(require("../repositories/user-repo"));
 const getUserService = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -70,3 +70,15 @@ const getUserByIdService = (id) => __awaiter(void 0, void 0, void 0, function* (
     return response;
 });
 exports.getUserByIdService = getUserByIdService;
+const deleteUserService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!userId) {
+        return yield httpResponse.badRequest();
+    }
+    const userExists = yield UserRepository.findUserByID(userId);
+    if (!userExists) {
+        return yield httpResponse.notFound();
+    }
+    yield UserRepository.deleteUser(userId);
+    return yield httpResponse.noContent();
+});
+exports.deleteUserService = deleteUserService;

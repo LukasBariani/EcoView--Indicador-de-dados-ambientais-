@@ -10,49 +10,45 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteReadingsByDeviceId = exports.findReadingsByPeriod = exports.createReading = exports.findLastReadingByDeviceId = exports.findReadingsByDeviceId = exports.findAllReadings = void 0;
-const readingDatabase = [];
+const reading_model_1 = require("../models/reading-model");
 // 🔹 Buscar todas as readings
 const findAllReadings = () => __awaiter(void 0, void 0, void 0, function* () {
-    return readingDatabase;
+    return yield reading_model_1.Reading.findAll();
 });
 exports.findAllReadings = findAllReadings;
 // 🔹 Buscar readings por device ID
 const findReadingsByDeviceId = (deviceId) => __awaiter(void 0, void 0, void 0, function* () {
-    return readingDatabase.filter(reading => reading.deviceId === deviceId);
+    return yield reading_model_1.Reading.findAll({ where: { deviceId } });
 });
 exports.findReadingsByDeviceId = findReadingsByDeviceId;
 // 🔹 Buscar última reading de um device
 const findLastReadingByDeviceId = (deviceId) => __awaiter(void 0, void 0, void 0, function* () {
-    const deviceReadings = readingDatabase.filter(reading => reading.deviceId === deviceId);
-    return deviceReadings.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0];
+    return yield reading_model_1.Reading.findOne({
+        where: { deviceId },
+        order: [["createdAt", "DESC"]],
+    });
 });
 exports.findLastReadingByDeviceId = findLastReadingByDeviceId;
 // 🔹 Criar nova reading
 const createReading = (reading) => __awaiter(void 0, void 0, void 0, function* () {
-    const ids = readingDatabase.map(r => r.id || 0);
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    const newId = maxId + 1;
-    const newReading = Object.assign(Object.assign({}, reading), { id: newId, createdAt: new Date(), updatedAt: new Date() });
-    readingDatabase.push(newReading);
-    return newReading;
+    return yield reading_model_1.Reading.create(reading);
 });
 exports.createReading = createReading;
 // 🔹 Buscar readings por período
 const findReadingsByPeriod = (deviceId, startDate, endDate) => __awaiter(void 0, void 0, void 0, function* () {
-    return readingDatabase.filter(reading => reading.deviceId === deviceId &&
-        reading.createdAt &&
-        reading.createdAt >= startDate &&
-        reading.createdAt <= endDate);
+    return yield reading_model_1.Reading.findAll({
+        where: {
+            deviceId,
+            createdAt: {
+                gte: startDate,
+                lte: endDate,
+            },
+        },
+    });
 });
 exports.findReadingsByPeriod = findReadingsByPeriod;
 // 🔹 Deletar readings de um device
 const deleteReadingsByDeviceId = (deviceId) => __awaiter(void 0, void 0, void 0, function* () {
-    const initialLength = readingDatabase.length;
-    for (let i = readingDatabase.length - 1; i >= 0; i--) {
-        if (readingDatabase[i].deviceId === deviceId) {
-            readingDatabase.splice(i, 1);
-        }
-    }
-    return initialLength - readingDatabase.length;
+    return yield reading_model_1.Reading.destroy({ where: { deviceId } });
 });
 exports.deleteReadingsByDeviceId = deleteReadingsByDeviceId;

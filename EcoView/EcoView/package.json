@@ -1,13 +1,69 @@
 {
   "name": "ecoview",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Aplicação Desktop de Indicadores Ambientais",
   "type": "module",
+  "main": "public/electron.js",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron-build": "npm run build && electron-builder",
+    "electron-build-win": "npm run build && electron-builder --win",
+    "electron-build-mac": "npm run build && electron-builder --mac",
+    "electron-build-linux": "npm run build && electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.ecoview.app",
+    "productName": "EcoView",
+    "files": [
+      "dist/**/*",
+      "public/electron.js",
+      "public/preload.js",
+      "public/icon.png",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "EcoView"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
@@ -24,10 +80,15 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^8.2.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-is-dev": "^3.0.1",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "wait-on": "^7.0.1"
   }
 }

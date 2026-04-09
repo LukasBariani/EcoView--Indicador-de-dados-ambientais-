@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getReadingsByPeriodService = exports.createReadingService = exports.getLastReadingByDeviceIdService = exports.getReadingsByDeviceIdService = exports.getReadingsService = void 0;
+exports.createReadingService = exports.getLastReadingByDeviceIdService = exports.getReadingsByDeviceIdService = exports.getReadingsService = void 0;
 // services/reading-service.ts
 const httpResponse = __importStar(require("../../utils/http-helper"));
 const readingRepository = __importStar(require("../repositories/reading-repo"));
@@ -61,6 +61,7 @@ const getLastReadingByDeviceIdService = (deviceId) => __awaiter(void 0, void 0, 
 });
 exports.getLastReadingByDeviceIdService = getLastReadingByDeviceIdService;
 const createReadingService = (reading, apiKey) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     if (!reading || Object.keys(reading).length === 0) {
         console.log("Dados da reading são obrigatórios");
         return yield httpResponse.badRequest();
@@ -76,31 +77,25 @@ const createReadingService = (reading, apiKey) => __awaiter(void 0, void 0, void
     if (apiKey) {
         reading.deviceId = device.id;
     }
+    // 🔹 Mapeia os campos que o ESP envia
+    const normalizedReading = {
+        temperature: reading.temperature,
+        humidity: reading.humidity,
+        luminosity: (_a = reading.ldr) !== null && _a !== void 0 ? _a : 0,
+        gas: (_b = reading.mq135) !== null && _b !== void 0 ? _b : 0,
+        deviceId: reading.deviceId
+    };
     // Validações básicas
-    if (reading.temperature < -50 || reading.temperature > 100) {
+    if (normalizedReading.temperature < -50 || normalizedReading.temperature > 100) {
         console.log("Temperatura fora do range válido (-50 a 100)");
         return yield httpResponse.badRequest();
     }
-    if (reading.humidity < 0 || reading.humidity > 100) {
+    if (normalizedReading.humidity < 0 || normalizedReading.humidity > 100) {
         console.log("Umidade fora do range válido (0 a 100)");
         return yield httpResponse.badRequest();
     }
-    const createdReading = yield readingRepository.createReading(reading);
+    // Criar no banco
+    const createdReading = yield readingRepository.createReading(normalizedReading);
     return yield httpResponse.created(createdReading);
 });
 exports.createReadingService = createReadingService;
-const getReadingsByPeriodService = (deviceId, startDate, endDate) => __awaiter(void 0, void 0, void 0, function* () {
-    const device = yield deviceRepository.findDeviceByID(deviceId);
-    if (!device) {
-        return yield httpResponse.notFound("Device não encontrado");
-    }
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        console.log("Datas inválidas");
-        return yield httpResponse.badRequest();
-    }
-    const data = yield readingRepository.findReadingsByPeriod(deviceId, start, end);
-    return data.length > 0 ? yield httpResponse.ok(data) : yield httpResponse.noContent();
-});
-exports.getReadingsByPeriodService = getReadingsByPeriodService;
